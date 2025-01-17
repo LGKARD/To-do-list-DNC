@@ -1,14 +1,28 @@
-let tasks = [ 
-    {id:1, description: 'tomar banho', checked: false},
-    {id:2, description: 'tomar agua', checked: false},
-    {id:3, description: 'tomar vinho', checked: false}
+let tasks = [
+    { id: 1, description: 'tomar banho', checked: false },
+    { id: 2, description: 'tomar agua', checked: false },
+    { id: 3, description: 'tomar vinho', checked: false }
 ]
 
 const removeTask = (taskId) => {
-    tasks = tasks.filter(({id}) => parseInt(id) !== parseInt(taskId));
+    tasks = tasks.filter(({ id }) => parseInt(id) !== parseInt(taskId));
     document
         .getElementById("todo-list")
         .removeChild(document.getElementById(taskId));
+}
+
+const removeDoneTasks = () => {
+    const tasksToRemove = tasks
+        .filter(({ checked }) => checked)
+        .map(({ id }) => id)
+    
+    tasks = tasks.filter(({checked}) => !checked);
+
+    tasksToRemove.forEach((tasksToRemove) => {
+        document
+            .getElementById("todo-list")
+            .removeChild(document.getElementById(tasksToRemove))
+    })
 }
 
 const createTaskListItem = (task, checkbox) => {
@@ -29,6 +43,14 @@ const createTaskListItem = (task, checkbox) => {
     return toDo;
 }
 
+const onCheckboxClick = (event) => {
+    const [id] = event.target.id.split('-');
+
+    tasks = tasks.map((task) => {
+        return parseInt(task.id) === parseInt(id) ? { ...task, checked: event.target.checked } : task;
+    })
+}
+
 const getCheckboxInput = ({ id, description, checked }) => {
     const checkbox = document.createElement('input');
     const label = document.createElement('label');
@@ -38,6 +60,7 @@ const getCheckboxInput = ({ id, description, checked }) => {
     checkbox.type = 'checkbox';
     checkbox.id = `${id}-checkbox`;
     checkbox.checked = checked || false;
+    checkbox.addEventListener('change', onCheckboxClick)
 
     label.textContent = description;
     label.htmlFor = checkboxId;
