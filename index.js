@@ -1,22 +1,36 @@
-let tasks = [
+/* let tasks = [
     { id: 1, description: 'tomar banho', checked: false },
     { id: 2, description: 'tomar agua', checked: false },
     { id: 3, description: 'tomar vinho', checked: false }
-]
+] */
+
+const getTasksFromLocalStorage = () => {
+    const localTasks = JSON.parse(window.localStorage.getItem('tasks'))
+    return localTasks ? localTasks : []
+}
+
+const setTasksInLocalStorage = (tasks) => {
+    window.localStorage.setItem('tasks', JSON.stringify(tasks));
+}
 
 const removeTask = (taskId) => {
-    tasks = tasks.filter(({ id }) => parseInt(id) !== parseInt(taskId));
+    const tasks = getTasksFromLocalStorage();
+    const updateTasks = tasks.filter(({ id }) => parseInt(id) !== parseInt(taskId));
+    setTasksInLocalStorage(updateTasks)
+
     document
         .getElementById("todo-list")
         .removeChild(document.getElementById(taskId));
 }
 
 const removeDoneTasks = () => {
+    const tasks = getTasksFromLocalStorage();
     const tasksToRemove = tasks
         .filter(({ checked }) => checked)
         .map(({ id }) => id)
-    
-    tasks = tasks.filter(({checked}) => !checked);
+
+    const updateTasks = tasks.filter(({ checked }) => !checked);
+    setTasksInLocalStorage(updateTasks);
 
     tasksToRemove.forEach((tasksToRemove) => {
         document
@@ -45,10 +59,12 @@ const createTaskListItem = (task, checkbox) => {
 
 const onCheckboxClick = (event) => {
     const [id] = event.target.id.split('-');
+    const tasks = getTasksFromLocalStorage();
 
-    tasks = tasks.map((task) => {
+    const updateTasks = tasks.map((task) => {
         return parseInt(task.id) === parseInt(id) ? { ...task, checked: event.target.checked } : task;
     })
+    setTasksInLocalStorage(updateTasks);
 }
 
 const getCheckboxInput = ({ id, description, checked }) => {
@@ -74,11 +90,12 @@ const getCheckboxInput = ({ id, description, checked }) => {
 }
 
 const getNewTaskId = () => {
+    const tasks = getTasksFromLocalStorage();
     const lastId = tasks[tasks.length - 1]?.id;
     return lastId ? lastId + 1 : 1;
 }
 
-const getNewTaskData = () => {
+const getNewTaskData = (event) => {
     const description = event.target.elements.description.value;
     const id = getNewTaskId();
     return { description, id }
@@ -91,12 +108,17 @@ const createTask = (event) => {
     const checkbox = getCheckboxInput(newTaskData);
     createTaskListItem(newTaskData, checkbox);
 
-    tasks = [...tasks, { id: newTaskData.id, description: newTaskData.description, checked: false }]
+    const tasks = getTasksFromLocalStorage();
+    const updateTasks = [...tasks, { id: newTaskData.id, description: newTaskData.description, checked: false }]
+    setTasksInLocalStorage(updateTasks);
+
+    document.getElementById('description').value = ''
 }
 
 window.onload = function () {
     const form = document.getElementById('create-todo-form');
     form.addEventListener('submit', createTask)
+    const tasks = getTasksFromLocalStorage();
 
     tasks.forEach((task) => {
         const checkbox = getCheckboxInput(task);

@@ -138,6 +138,7 @@ main {
     border-radius: .4rem;
     cursor: pointer;
     padding: 0 1.6rem;
+
     &:hover {
         opacity: .8;
     }
