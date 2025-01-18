@@ -17,6 +17,7 @@ const removeTask = (taskId) => {
     const tasks = getTasksFromLocalStorage();
     const updateTasks = tasks.filter(({ id }) => parseInt(id) !== parseInt(taskId));
     setTasksInLocalStorage(updateTasks)
+    renderTasksProgress(updateTasks)
 
     document
         .getElementById("todo-list")
@@ -31,6 +32,7 @@ const removeDoneTasks = () => {
 
     const updateTasks = tasks.filter(({ checked }) => !checked);
     setTasksInLocalStorage(updateTasks);
+    renderTasksProgress(updateTasks)
 
     tasksToRemove.forEach((tasksToRemove) => {
         document
@@ -65,6 +67,7 @@ const onCheckboxClick = (event) => {
         return parseInt(task.id) === parseInt(id) ? { ...task, checked: event.target.checked } : task;
     })
     setTasksInLocalStorage(updateTasks);
+    renderTasksProgress(updateTasks)
 }
 
 const getCheckboxInput = ({ id, description, checked }) => {
@@ -111,8 +114,26 @@ const createTask = (event) => {
     const tasks = getTasksFromLocalStorage();
     const updateTasks = [...tasks, { id: newTaskData.id, description: newTaskData.description, checked: false }]
     setTasksInLocalStorage(updateTasks);
+    renderTasksProgress(updateTasks)
 
     document.getElementById('description').value = ''
+}
+
+const renderTasksProgress = (tasks) => {
+    let tasksProgress;
+    const tasksProgressDOM = document.getElementById('tasks-progress');
+
+    if (tasksProgressDOM) tasksProgress = tasksProgressDOM;
+    else {
+        const newTasksProgressDOM = document.createElement('div');
+        newTasksProgressDOM.id = 'tasks-progress';
+        document.getElementsByTagName('footer')[0].appendChild(newTasksProgressDOM);
+        tasksProgress = newTasksProgressDOM;
+    }
+
+    const doneTasks = tasks.filter(({ checked }) => checked).length
+    const totalTasks = tasks.length;
+    tasksProgress.textContent = `${doneTasks}/${totalTasks} concluídas`
 }
 
 window.onload = function () {
@@ -124,4 +145,6 @@ window.onload = function () {
         const checkbox = getCheckboxInput(task);
         createTaskListItem(task, checkbox)
     })
+
+    renderTasksProgress(tasks)
 }
